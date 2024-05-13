@@ -92,9 +92,24 @@ const updateEntryInTable = async (req, res) => {
         res.status(500).json({ error: 'Error updating entry' });
     }
 };
+const deleteEntryFromTable = async (req, res) => {
+    const { tableName, primaryKey, primaryKeyValue } = req.body;
 
+    try {
+        // Construct SQL query string
+        const query = `DELETE FROM ${tableName} WHERE ${primaryKey} = '${primaryKeyValue}'`;
 
-export {createTable,addEntryToTable,updateEntryInTable};
+        // Execute SQL query
+        await sequelize.query(query);
+
+        res.json({ message: 'Entry deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting entry:', error);
+        res.status(500).json({ error: 'Error deleting entry' });
+    }
+};
+
+export {createTable,addEntryToTable,updateEntryInTable,deleteEntryFromTable};
 
 
 
