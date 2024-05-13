@@ -41,27 +41,6 @@ dotenv.config();
 
 const port = process.env.PORT || 8000;
 
-
-// Create Sequelize instance
-// const sequelize = new Sequelize(DB_NAME, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
-//     host: process.env.MYSQL_HOST,
-//     dialect: 'mysql',
-//   });
-  
-//   // Define model for dynamic tables
-//   const DynamicTable = sequelize.define('dynamic_table', {
-//     table_name: DataTypes.STRING,
-//     // Add other attributes as needed
-//   });
-  
-//   // Check if the metadata table exists
-//   DynamicTable.sync()
-//     .then(() => {
-//       console.log('Dynamic table metadata synced');
-//     })
-//     .catch((error) => {
-//       console.error('Error syncing dynamic table metadata:', error);
-//     });
 sequelize.authenticate()
 .then(() => {
   // Start the server
