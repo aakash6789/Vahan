@@ -75,9 +75,26 @@ const addEntryToTable = async (req, res) => {
         res.status(500).json({ error: 'Error adding entry' });
     }
 };
+const updateEntryInTable = async (req, res) => {
+    const { tableName, primaryKey, primaryKeyValue, updatedValues } = req.body;
+
+    try {
+        // Construct SQL query string
+        const setValues = Object.keys(updatedValues).map(key => `${key} = '${updatedValues[key]}'`).join(', ');
+        const query = `UPDATE ${tableName} SET ${setValues} WHERE ${primaryKey} = '${primaryKeyValue}'`;
+
+        // Execute SQL query
+        await sequelize.query(query);
+
+        res.json({ message: 'Entry updated successfully' });
+    } catch (error) {
+        console.error('Error updating entry:', error);
+        res.status(500).json({ error: 'Error updating entry' });
+    }
+};
 
 
-export {createTable,addEntryToTable};
+export {createTable,addEntryToTable,updateEntryInTable};
 
 
 
