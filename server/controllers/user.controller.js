@@ -53,8 +53,31 @@ sequelize.query(`SHOW TABLES LIKE '${tableName}'`)
     });
 }
 
+const addEntryToTable = async (req, res) => {
+    const { tableName, entry } = req.body;
+  console.log(tableName,entry);
+    try {
+        // Insert the entry into the existing table
+        // await sequelize.query(`INSERT INTO ${tableName} SET ?`, {
+        //     replacements: entry,
+        //     type: sequelize.QueryTypes.INSERT
+        // });
+        const columns = Object.keys(entry).join(', ');
+        const values = Object.values(entry).map(value => typeof value === 'string' ? `'${value}'` : value).join(', ');
+        const query = `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
 
-export {createTable};
+        // Execute SQL query
+        await sequelize.query(query);
+
+        res.json({ message: 'Entry added successfully' });
+    } catch (error) {
+        console.error('Error adding entry:', error);
+        res.status(500).json({ error: 'Error adding entry' });
+    }
+};
+
+
+export {createTable,addEntryToTable};
 
 
 
