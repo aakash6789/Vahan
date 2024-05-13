@@ -5,43 +5,15 @@ import app from '../app.js';
 import {DB_NAME} from '../constants.js'
 import mysql from 'mysql2/promise';
 import userRouter from '../routes/user.routes.js'
-const envPath = '../.env';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
+// Define the path to the .env file relative to the current file
+const envPath = join(__dirname, '../.env');
 
-
-
-// const port = process.env.PORT || 8000;
-
-// // Create Sequelize instance
-// const sequelize = new Sequelize(DB_NAME, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
-//     host: process.env.MYSQL_HOST,
-//     dialect: 'mysql',
-//   });
-  
-//   // Define model for dynamic tables
-//   const DynamicTable = sequelize.define('dynamic_table', {
-//     table_name: DataTypes.STRING,
-//     // Add other attributes as needed
-//   });
-  
-//   // Check if the metadata table exists
-//   DynamicTable.sync()
-//     .then(() => {
-//       console.log('Dynamic table metadata synced');
-//     })
-//     .catch((error) => {
-//       console.error('Error syncing dynamic table metadata:', error);
-//     });
-  
-//   // Start the server after ensuring metadata table is created
-//   app.listen(port, () => {
-//       console.log(`Server is running on port ${port}`);
-//     });
-    
-
-//   export default sequelize;
-
-dotenv.config({ path: envPath });
+dotenv.config();
 // const connection =  mysql.createPool({
 //     host: `${process.env.MYSQL_HOST}`,
 //     user: `${process.env.MYSQL_USER}`,
@@ -77,8 +49,8 @@ const initializeDatabase = async () => {
     }
   };
   
-const sequelize = new Sequelize(DB_NAME, "root", "password1", {
-    host: "localhost",
+const sequelize = new Sequelize(DB_NAME,  process.env.MYSQL_USER, process.env.MYSQL_PASSWORD, {
+    host: process.env.MYSQL_HOST,
     dialect: 'mysql',
   });
   
