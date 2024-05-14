@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { createTable,addEntryToTable,updateEntryInTable,deleteEntryFromTable } from "../controllers/user.controller.js";
+import { createTable,addEntryToTable,updateEntryInTable,deleteEntryFromTable,deleteTable } from "../controllers/user.controller.js";
 
 const router=Router();
 router.post('/create-table',createTable);
 router.post('/add-entry',addEntryToTable);
 router.post('/update-entry',updateEntryInTable);
 router.post('/delete-entry',deleteEntryFromTable);
+router.post('/delete-table',deleteTable);
 
 export default router;

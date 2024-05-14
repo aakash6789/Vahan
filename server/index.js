@@ -43,7 +43,6 @@ const port = process.env.PORT || 8000;
 
 sequelize.authenticate()
 .then(() => {
-  // Start the server
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
@@ -52,8 +51,3 @@ sequelize.authenticate()
 .catch((error) => {
   console.error('Error initializing database:', error);
 });
-  // Start the server after ensuring metadata table is created
-  
-  // app.listen(port, () => {
-  //   console.log(`Server is running on port ${port}`);
-  // });
