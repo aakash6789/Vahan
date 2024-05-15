@@ -90,22 +90,38 @@ const deleteTable = async (req, res) => {
         res.status(500).json({ error: 'Error deleting table' });
     }
 };
+const fetchAllTables = async (req,res) => {
+    try {
+      const query = `
+        SELECT table_name, column_name, data_type
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()`;
+  
 
-export { createTable, addEntryToTable, updateEntryInTable, deleteEntryFromTable,deleteTable };
+      const [tableColumns, metadata] = await sequelize.query(query);
+      const tables = {};
+      tableColumns.forEach(row => {
+        const tableName = row.table_name;
+        const columnName = row.column_name;
+        const dataType = row.data_type;
+        if (!tables[tableName]) {
+          tables[tableName] = [];
+        }
+        tables[tableName].push({ name: columnName, type: dataType });
+      });
+      const tablesArray = Object.keys(tables).map(tableName => ({
+        tableName: tableName,
+        columns: tables[tableName]
+      }));
+      res.status(200).json(new ApiResponse(200, tablesArray, 'Table deleted successfully'));
+    } catch (error) {
+      console.error('Error fetching tables:', error);
+      throw new ApiError(500, `${error.message}`);
+    
+    }
+  };
+
+export { createTable, addEntryToTable, updateEntryInTable, deleteEntryFromTable,deleteTable,fetchAllTables };
 
 
 
-//     sequelize.query(createTableQuery)
-// .then(() => {
-//     // Insert metadata into metadata table
-//     const insertMetadataQuery = `INSERT INTO metadata (table_name, columns) VALUES (?, ?)`;
-//     const metadataValues = [tableName, `Number of columns: ${columns}`];
-//     return sequelize.query(insertMetadataQuery, { replacements: metadataValues });
-// })
-// .then(() => {
-//     res.json({ message: 'Table created successfully' });
-// })
-// .catch((error) => {
-//     console.error('Error creating table:', error);
-//     res.status(500).json({ error: 'Error creating table' });
-// });
