@@ -84,7 +84,7 @@ formData.columns.forEach(element => {
             <input
               type="text"
               placeholder="Column Name"
-              className='border-[2px] mt-[2px] pl-[5px]'
+              className='border-[2px] mt-[2px] py-[2px] pl-[5px]'
               value={column.name}
               onChange={e => handleColumnNameChange(index, e)}
               required
@@ -100,12 +100,11 @@ formData.columns.forEach(element => {
 //   value={column.type}
   onChange={e => handleColumnTypeChange(index, e.target.value)}
   required
-  className='border-[2px] ml-[2%]'
+  className='border-[2px] ml-[2%] text-sm px-2 py-1'
 >
   <option value="" selected={column.type === ''}>Select Column Type</option>
   <option value="INTEGER" selected={column.type === 'INTEGER'}>INTEGER</option>
   <option value="VARCHAR(255)" selected={column.type === 'VARCHAR(255)'}>VARCHAR(255)</option>
-  <option value="TEXT" selected={column.type === 'TEXT'}>TEXT</option>
   <option value="DATE" selected={column.type === 'DATE'}>DATE</option>
   <option value="DATETIME" selected={column.type === 'DATETIME'}>DATETIME</option>
   <option value="TIMESTAMP" selected={column.type === 'TIMESTAMP'}>TIMESTAMP</option>
