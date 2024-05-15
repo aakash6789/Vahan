@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import Navbar from './components/Navbar.jsx'
 import CreateTableForm from './components/CreateTableForm.jsx'
+import TableComponent from './components/TableComponent.jsx'
 function App() {
  
 
@@ -11,6 +12,7 @@ function App() {
     <>
       <Navbar/>
       <CreateTableForm/>
+      <TableComponent/>
     </>
   )
 }

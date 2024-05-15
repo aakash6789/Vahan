@@ -2,3 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+#tab_b{
+    border: 0.4px solid #E9E9EB;
+    padding :0.8rem
+  }

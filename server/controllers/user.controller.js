@@ -90,30 +90,82 @@ const deleteTable = async (req, res) => {
         res.status(500).json({ error: 'Error deleting table' });
     }
 };
+const fetchTableData = async (tableName) => {
+    try {
+      // Query to fetch column details from information_schema.columns
+      const columnQuery = `
+        SELECT column_name, data_type
+        FROM information_schema.columns
+        WHERE table_schema = DATABASE()
+        AND table_name = '${tableName}'`;
+  
+      // Execute the column query
+      const [columns, columnMetadata] = await sequelize.query(columnQuery);
+  
+      // Extract column details
+      const tableSchema = columns.map(column => ({
+        name: column.column_name,
+        type: column.data_type
+      }));
+  
+      // Query to fetch rows from the table
+      const rowsQuery = `SELECT * FROM ${tableName}`;
+  
+      // Execute the rows query
+      const [rows, rowMetadata] = await sequelize.query(rowsQuery);
+  
+      // Combine table schema and rows into a single response object
+      const tableData = {
+        tableName: tableName,
+        columns: tableSchema,
+        rows: rows
+      };
+  
+      return tableData;
+    } catch (error) {
+      console.error('Error fetching table data:', error);
+      throw new Error('Error fetching table data');
+    }
+  };
 const fetchAllTables = async (req,res) => {
     try {
-      const query = `
-        SELECT table_name, column_name, data_type
-        FROM information_schema.columns
-        WHERE table_schema = DATABASE()`;
+    //   const query = `
+    //     SELECT table_name, column_name, data_type
+    //     FROM information_schema.columns
+    //     WHERE table_schema = DATABASE()`;
   
 
-      const [tableColumns, metadata] = await sequelize.query(query);
-      const tables = {};
-      tableColumns.forEach(row => {
-        const tableName = row.table_name;
-        const columnName = row.column_name;
-        const dataType = row.data_type;
-        if (!tables[tableName]) {
-          tables[tableName] = [];
-        }
-        tables[tableName].push({ name: columnName, type: dataType });
-      });
-      const tablesArray = Object.keys(tables).map(tableName => ({
-        tableName: tableName,
-        columns: tables[tableName]
-      }));
-      res.status(200).json(new ApiResponse(200, tablesArray, 'Table deleted successfully'));
+    //   const [tableColumns, metadata] = await sequelize.query(query);
+    //   const tables = {};
+    //   tableColumns.forEach(row => {
+    //     const tableName = row.table_name;
+    //     const columnName = row.column_name;
+    //     const dataType = row.data_type;
+    //     if (!tables[tableName]) {
+    //       tables[tableName] = [];
+    //     }
+    //     tables[tableName].push({ name: columnName, type: dataType });
+    //   });
+    //   const tablesArray = Object.keys(tables).map(tableName => ({
+    //     tableName: tableName,
+    //     columns: tables[tableName]
+    //   }));
+    const tableQuery = `
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = DATABASE()
+      AND table_type = 'BASE TABLE'`;
+
+    // Execute the table query
+    const [tables, metadata] = await sequelize.query(tableQuery);
+
+    // Fetch data for each table
+    const tablesData = await Promise.all(tables.map(async (table) => {
+      const tableName = table.table_name;
+      const tableData = await fetchTableData(tableName);
+     return tableData;
+    }));
+    res.status(200).json(new ApiResponse(200, tablesData, 'Tables fetched successfully'));
     } catch (error) {
       console.error('Error fetching tables:', error);
       throw new ApiError(500, `${error.message}`);
