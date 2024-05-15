@@ -3,7 +3,9 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 const CreateTableForm = () => {
   const [tableName, setTableName] = useState('');
-  const [columns, setColumns] = useState([{ name: '', type: '' }]);
+  // const [columns, setColumns] = useState([{ name: '', type: '' }]);
+  const [columns, setColumns] = useState([{ name: '', type: '', primaryKey: false }]);
+
 
   const handleColumnNameChange = (index, event) => {
     const newColumns = [...columns];
@@ -62,6 +64,22 @@ formData.columns.forEach(element => {
       }
       callReg(formData);
   };
+  const handlePrimaryKeyChange = (index, event) => {
+    const newColumns = [...columns];
+    newColumns[index].primaryKey = event.target.checked;
+    
+    // Check if the checkbox is checked
+    if (event.target.checked) {
+      // Uncheck the primaryKey property for all other columns
+      newColumns.forEach((column, i) => {
+        if (i !== index) {
+          column.primaryKey = false;
+        }
+      });
+    }
+    
+    setColumns(newColumns);
+  };
 
   return (
     <div className='mt-[10%] max-sm:mt-[20%]'>
@@ -110,6 +128,13 @@ formData.columns.forEach(element => {
   <option value="TIMESTAMP" selected={column.type === 'TIMESTAMP'}>TIMESTAMP</option>
   {/* Add more options as needed */}
 </select>
+<input
+  type="checkbox"
+  checked={column.primaryKey}
+  onChange={e => handlePrimaryKeyChange(index, e)}
+  className='ml-[1%] mr-[2px]'
+/>
+<label>Primary Key</label>
 
             <button type="button" className='ml-[1%] rounded-lg px-4 text-[0.8rem] bg-black text-white' onClick={() => handleRemoveColumn(index)}>Remove</button>
           </div>

@@ -5,6 +5,7 @@ import './App.css'
 import Navbar from './components/Navbar.jsx'
 import CreateTableForm from './components/CreateTableForm.jsx'
 import TableComponent from './components/TableComponent.jsx'
+import Home from './components/Home.jsx'
 function App() {
  
 
@@ -12,7 +13,8 @@ function App() {
     <>
       <Navbar/>
       <CreateTableForm/>
-      <TableComponent/>
+      {/* <TableComponent/> */}
+      <Home/>
     </>
   )
 }

@@ -2,37 +2,82 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import ApiError from "../utils/ApiError.js";
 import { sequelize } from "../db/index.js";
+// const createTable = asyncHandler(async (req, res) => {
+//     const { tableName, columns } = req.body;
+//     console.log(tableName, columns);
+//     sequelize.query(`SHOW TABLES LIKE '${tableName}'`)
+//         .then(([existingTables]) => {
+//             if (existingTables.length > 0) {              // To check if table exists
+//                 return res.status(409).json(new ApiResponse(409, {}, 'Table already exists'));
+//             }
+//             const columnDefinitions = columns.map(column => `${column.name} ${column.type}`).join(', ');
+//             const createTableQuery = `CREATE TABLE ${tableName} (${columnDefinitions})`;
+
+//             sequelize.query(createTableQuery)
+//                 .then(() => {
+//                     const tableSchemaQuery = `SHOW COLUMNS FROM ${tableName}`;
+//                     const createdTable = sequelize.query(tableSchemaQuery, { type: sequelize.QueryTypes.SHOWTABLES }).then((data) => res.status(200).json(new ApiResponse(200, data, 'Table created successfully'))).catch((error) => {
+//                         console.error('Error creating table:', error);
+//                         throw new ApiError(500, `${error.message}`);
+//                     });
+//                 })
+//                 .catch((error) => {
+//                     console.error('Error creating table:', error);
+//                     throw new ApiError(500, `${error.message}`);
+
+//                 });
+//         })
+//         .catch((error) => {
+//             console.error('Error checking if table exists:', error);
+//             throw new ApiError(500, 'Error checking if table exists');
+
+//         });
+// });
 const createTable = asyncHandler(async (req, res) => {
     const { tableName, columns } = req.body;
-    console.log(tableName, columns);
+  
+    // Check if there is exactly one primary key column
+    const primaryKeyColumns = columns.filter(column => column.primaryKey);
+    if (primaryKeyColumns.length !== 1) {
+      return res.status(400).json(new ApiResponse(400, {}, 'Exactly one primary key column must be specified'));
+    }
+  
     sequelize.query(`SHOW TABLES LIKE '${tableName}'`)
-        .then(([existingTables]) => {
-            if (existingTables.length > 0) {              // To check if table exists
-                return res.status(409).json(new ApiResponse(409, {}, 'Table already exists'));
-            }
-            const columnDefinitions = columns.map(column => `${column.name} ${column.type}`).join(', ');
-            const createTableQuery = `CREATE TABLE ${tableName} (${columnDefinitions})`;
-
-            sequelize.query(createTableQuery)
-                .then(() => {
-                    const tableSchemaQuery = `SHOW COLUMNS FROM ${tableName}`;
-                    const createdTable = sequelize.query(tableSchemaQuery, { type: sequelize.QueryTypes.SHOWTABLES }).then((data) => res.status(200).json(new ApiResponse(200, data, 'Table created successfully'))).catch((error) => {
-                        console.error('Error creating table:', error);
-                        throw new ApiError(500, `${error.message}`);
-                    });
-                })
-                .catch((error) => {
-                    console.error('Error creating table:', error);
-                    throw new ApiError(500, `${error.message}`);
-
-                });
-        })
-        .catch((error) => {
-            console.error('Error checking if table exists:', error);
-            throw new ApiError(500, 'Error checking if table exists');
-
-        });
-});
+      .then(([existingTables]) => {
+        if (existingTables.length > 0) {
+          return res.status(409).json(new ApiResponse(409, {}, 'Table already exists'));
+        }
+  
+        const columnDefinitions = columns.map(column => {
+          if (column.primaryKey) {
+            return `${column.name} ${column.type} PRIMARY KEY`;
+          } else {
+            return `${column.name} ${column.type}`;
+          }
+        }).join(', ');
+  
+        const createTableQuery = `CREATE TABLE ${tableName} (${columnDefinitions})`;
+  
+        sequelize.query(createTableQuery)
+          .then(() => {
+            const tableSchemaQuery = `SHOW COLUMNS FROM ${tableName}`;
+            const createdTable = sequelize.query(tableSchemaQuery, { type: sequelize.QueryTypes.SHOWTABLES })
+              .then((data) => res.status(200).json(new ApiResponse(200, data, 'Table created successfully')))
+              .catch((error) => {
+                console.error('Error creating table:', error);
+                throw new ApiError(500, `${error.message}`);
+              });
+          })
+          .catch((error) => {
+            console.error('Error creating table:', error);
+            throw new ApiError(500, `${error.message}`);
+          });
+      })
+      .catch((error) => {
+        console.error('Error checking if table exists:', error);
+        throw new ApiError(500, 'Error checking if table exists');
+      });
+  });
 
 const addEntryToTable = async (req, res) => {
     const { tableName, entry } = req.body;
@@ -92,31 +137,42 @@ const deleteTable = async (req, res) => {
 };
 const fetchTableData = async (tableName) => {
     try {
-      // Query to fetch column details from information_schema.columns
       const columnQuery = `
         SELECT column_name, data_type
         FROM information_schema.columns
         WHERE table_schema = DATABASE()
         AND table_name = '${tableName}'`;
-  
-      // Execute the column query
+      
+
       const [columns, columnMetadata] = await sequelize.query(columnQuery);
-  
-      // Extract column details
+      
+
       const tableSchema = columns.map(column => ({
         name: column.column_name,
         type: column.data_type
       }));
+
+      const primaryKeyQuery = `
+        SELECT column_name
+        FROM information_schema.key_column_usage
+        WHERE table_schema = DATABASE()
+        AND table_name = '${tableName}'
+        AND constraint_name = 'PRIMARY'`;
   
-      // Query to fetch rows from the table
+      const [primaryKeyResult, primaryKeyMetadata] = await sequelize.query(primaryKeyQuery);
+      
+
+      const primaryKeyColumnName = primaryKeyResult.length > 0 ? primaryKeyResult[0].column_name : null;
+
       const rowsQuery = `SELECT * FROM ${tableName}`;
   
-      // Execute the rows query
+
       const [rows, rowMetadata] = await sequelize.query(rowsQuery);
   
-      // Combine table schema and rows into a single response object
+
       const tableData = {
         tableName: tableName,
+        primaryKey: primaryKeyColumnName,
         columns: tableSchema,
         rows: rows
       };
@@ -129,27 +185,7 @@ const fetchTableData = async (tableName) => {
   };
 const fetchAllTables = async (req,res) => {
     try {
-    //   const query = `
-    //     SELECT table_name, column_name, data_type
-    //     FROM information_schema.columns
-    //     WHERE table_schema = DATABASE()`;
   
-
-    //   const [tableColumns, metadata] = await sequelize.query(query);
-    //   const tables = {};
-    //   tableColumns.forEach(row => {
-    //     const tableName = row.table_name;
-    //     const columnName = row.column_name;
-    //     const dataType = row.data_type;
-    //     if (!tables[tableName]) {
-    //       tables[tableName] = [];
-    //     }
-    //     tables[tableName].push({ name: columnName, type: dataType });
-    //   });
-    //   const tablesArray = Object.keys(tables).map(tableName => ({
-    //     tableName: tableName,
-    //     columns: tables[tableName]
-    //   }));
     const tableQuery = `
       SELECT table_name
       FROM information_schema.tables
