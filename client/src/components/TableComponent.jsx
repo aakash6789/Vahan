@@ -8,8 +8,19 @@ import { MdEdit } from "react-icons/md";
 const TableComponent = ({data1}) => {
     const [data,setData]=useState(data1);
     const[isEdit,setIsEdit]=useState(false);
+    const [updateData, setUpdateData] = useState(null);
     
-
+   
+    // useEffect(()=>{},[]);
+    const sendUpdatedData=async()=>{
+        console.log(updateData);
+        const response=await axios.post('http://localhost:3000/api/v1/users/update-entry',updateData).then(res=>{
+            console.log("Data Updation response is",res);
+           })
+           .catch(err=>{
+             console.log("Error while updating data:",err);
+           })
+    }
   return (
     <div className='text-black mb-[10%] mt-[10%]'>
     
@@ -59,6 +70,7 @@ const TableComponent = ({data1}) => {
                              value={row[column.name]} 
                              onChange={(e) => {
                                 e.stopPropagation();
+                               
                                const updatedRows = [...data.rows];
                                updatedRows[rowIndex][column.name] = e.target.value;
                                setData(prevData => ({
@@ -68,6 +80,23 @@ const TableComponent = ({data1}) => {
                                    [column.name]:e.target.value
                                  }
                                }));
+                               const updatedEntry = {
+                                [data.primaryKey]: row[data.primaryKey], // Use primary key column name
+                                updatedValues: {
+                                    [column.name]: e.target.value
+                                }
+                            };
+                            // Update the updateData state
+                            setUpdateData(prevUpdateData => ({
+                                ...prevUpdateData,
+                                tableName: data.tableName,
+                                primaryKey: data.primaryKey,
+                                updatedEntries: [
+                                    ...(prevUpdateData?.updatedEntries || []), // Append to existing entries
+                                    updatedEntry
+                                ]
+                            }));
+                              console.log(updateData);
                              }} 
                              onClick={(e) => e.stopPropagation()}
                              onKeyDown={(e) => e.stopPropagation()}
@@ -84,6 +113,7 @@ const TableComponent = ({data1}) => {
                 <button className='bg-black absolute left-1 bottom-4 text-white px-2 rounded-md py-1 mx-2' onClick={() => setIsEdit(null)}>Close</button>
                 <button className='bg-black absolute right-1 bottom-4 text-white px-2 rounded-md py-1 mx-2' onClick={() => {
                     console.log("U", data);
+                    sendUpdatedData();
                     setIsEdit(null)}}>Save</button>
               </div>
             </Popup>

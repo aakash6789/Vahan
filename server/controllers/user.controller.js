@@ -78,6 +78,19 @@ const createTable = asyncHandler(async (req, res) => {
         throw new ApiError(500, 'Error checking if table exists');
       });
   });
+  const deleteEntryFromTable = async (req, res) => {
+    const { tableName, primaryKey, primaryKeyValue } = req.body;
+    try {
+        const query = `DELETE FROM ${tableName} WHERE ${primaryKey} = '${primaryKeyValue}'`;
+        await sequelize.query(query);
+        const updatedTableQuery = `SELECT * FROM ${tableName}`;
+        const [tableData] = await sequelize.query(updatedTableQuery);
+        res.status(200).json(new ApiResponse(200, tableData, 'Entry deleted successfully'));
+    } catch (error) {
+        console.error('Error deleting entry:', error);
+        res.status(500).json({ error: 'Error deleting entry' });
+    }
+};
 
 const addEntryToTable = async (req, res) => {
     const { tableName, entry } = req.body;
@@ -95,32 +108,24 @@ const addEntryToTable = async (req, res) => {
         res.status(500).json({ error: 'Error adding entry' });
     }
 };
-const updateEntryInTable = async (req, res) => {
-    const { tableName, primaryKey, primaryKeyValue, updatedValues } = req.body;
+const updateEntriesInTable = async (req, res) => {
+    const { tableName, primaryKey, updatedEntries } = req.body;
 
     try {
-        const setValues = Object.keys(updatedValues).map(key => `${key} = '${updatedValues[key]}'`).join(', ');
-        const query = `UPDATE ${tableName} SET ${setValues} WHERE ${primaryKey} = '${primaryKeyValue}'`;
-        await sequelize.query(query);
+        const updatePromises = updatedEntries.map(async entry => {
+            const setValues = Object.keys(entry.updatedValues).map(key => `${key} = '${entry.updatedValues[key]}'`).join(', ');
+            const query = `UPDATE ${tableName} SET ${setValues} WHERE ${primaryKey} = '${entry[primaryKey]}'`;
+            await sequelize.query(query);
+        });
+
+        await Promise.all(updatePromises);
+
         const updatedTableQuery = `SELECT * FROM ${tableName}`;
         const [tableData] = await sequelize.query(updatedTableQuery);
-        res.status(200).json(new ApiResponse(200, tableData, 'Entry updated successfully'));
+        res.status(200).json(new ApiResponse(200, tableData, 'Entries updated successfully'));
     } catch (error) {
-        console.error('Error updating entry:', error);
-        res.status(500).json({ error: 'Error updating entry' });
-    }
-};
-const deleteEntryFromTable = async (req, res) => {
-    const { tableName, primaryKey, primaryKeyValue } = req.body;
-    try {
-        const query = `DELETE FROM ${tableName} WHERE ${primaryKey} = '${primaryKeyValue}'`;
-        await sequelize.query(query);
-        const updatedTableQuery = `SELECT * FROM ${tableName}`;
-        const [tableData] = await sequelize.query(updatedTableQuery);
-        res.status(200).json(new ApiResponse(200, tableData, 'Entry deleted successfully'));
-    } catch (error) {
-        console.error('Error deleting entry:', error);
-        res.status(500).json({ error: 'Error deleting entry' });
+        console.error('Error updating entries:', error);
+        res.status(500).json({ error: 'Error updating entries' });
     }
 };
 
@@ -209,7 +214,7 @@ const fetchAllTables = async (req,res) => {
     }
   };
 
-export { createTable, addEntryToTable, updateEntryInTable, deleteEntryFromTable,deleteTable,fetchAllTables };
+export { createTable, addEntryToTable, updateEntriesInTable, deleteEntryFromTable,deleteTable,fetchAllTables };
 
 
 
