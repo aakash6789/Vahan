@@ -31,7 +31,7 @@ useEffect(() => {
          {data && Array.isArray(data) && data
       .filter(table => table.tableName !== "metadata")
       .map((table, index) => (
-       <TableComponent data1={table} key={index}/>
+       <TableComponent data1={table} setData1={setData} key={index}/>
       ))}
       
     </div>

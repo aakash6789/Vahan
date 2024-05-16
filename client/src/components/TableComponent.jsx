@@ -134,12 +134,27 @@ import Popup from './Popup.jsx';
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 
-const TableComponent = ({ data1 }) => {
+const TableComponent = ({ data1,setData1 }) => {
   const [data, setData] = useState(data1);
   const [isEdit, setIsEdit] = useState(false);
   const [updateData, setUpdateData] = useState(null);
   const [newRow, setNewRow] = useState({});
-
+  const deleteRow = async (rowIndex) => {
+    const rowToDelete = data.rows[rowIndex];
+    const response = await axios.post('http://localhost:3000/api/v1/users/delete-entry', { tableName: data.tableName, primaryKey:[data.primaryKey],primaryKeyValue: rowToDelete[data.primaryKey] })
+      .then(res => {
+        console.log("Row deletion response is", res);
+        toast.success("Row deleted successfully!");
+        setData(prevData => ({
+          ...prevData,
+          rows: prevData.rows.filter((_, index) => index !== rowIndex)
+        }));
+      })
+      .catch(err => {
+        console.log("Error while deleting row:", err);
+        toast.error("Error deleting row!");
+      });
+  };
   // useEffect(() => {
   //   // Initialize newRow with empty values
   //   const emptyRow = {};
@@ -174,6 +189,12 @@ const TableComponent = ({ data1 }) => {
     console.log(newRow);
     const response = await axios.post('http://localhost:3000/api/v1/users/add-entry', { tableName: data.tableName, newRow })
       .then(res => {
+        // setData(res.data.data);
+        setData(prevData => ({
+          ...prevData,
+          rows: [...prevData.rows, newRow]
+        }));
+        setNewRow({});
         console.log("New row addition response is", res);
         toast.success("Row added successfully!");
       })
@@ -268,6 +289,11 @@ const TableComponent = ({ data1 }) => {
                           )}
                         </td>
                       ))}
+                      <td id='tab_b'>
+                        <button className='bg-red-500 text-white px-2 rounded-md py-1 mx-2' onClick={() => deleteRow(rowIndex)}>
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   <tr id='tab_b'>

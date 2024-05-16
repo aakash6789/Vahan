@@ -79,6 +79,7 @@ const createTable = asyncHandler(async (req, res) => {
       });
   });
   const deleteEntryFromTable = async (req, res) => {
+    console.log(req.body);
     const { tableName, primaryKey, primaryKeyValue } = req.body;
     try {
         const query = `DELETE FROM ${tableName} WHERE ${primaryKey} = '${primaryKeyValue}'`;
