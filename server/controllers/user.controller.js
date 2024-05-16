@@ -2,37 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import ApiError from "../utils/ApiError.js";
 import { sequelize } from "../db/index.js";
-// const createTable = asyncHandler(async (req, res) => {
-//     const { tableName, columns } = req.body;
-//     console.log(tableName, columns);
-//     sequelize.query(`SHOW TABLES LIKE '${tableName}'`)
-//         .then(([existingTables]) => {
-//             if (existingTables.length > 0) {              // To check if table exists
-//                 return res.status(409).json(new ApiResponse(409, {}, 'Table already exists'));
-//             }
-//             const columnDefinitions = columns.map(column => `${column.name} ${column.type}`).join(', ');
-//             const createTableQuery = `CREATE TABLE ${tableName} (${columnDefinitions})`;
 
-//             sequelize.query(createTableQuery)
-//                 .then(() => {
-//                     const tableSchemaQuery = `SHOW COLUMNS FROM ${tableName}`;
-//                     const createdTable = sequelize.query(tableSchemaQuery, { type: sequelize.QueryTypes.SHOWTABLES }).then((data) => res.status(200).json(new ApiResponse(200, data, 'Table created successfully'))).catch((error) => {
-//                         console.error('Error creating table:', error);
-//                         throw new ApiError(500, `${error.message}`);
-//                     });
-//                 })
-//                 .catch((error) => {
-//                     console.error('Error creating table:', error);
-//                     throw new ApiError(500, `${error.message}`);
-
-//                 });
-//         })
-//         .catch((error) => {
-//             console.error('Error checking if table exists:', error);
-//             throw new ApiError(500, 'Error checking if table exists');
-
-//         });
-// });
 const createTable = asyncHandler(async (req, res) => {
     const { tableName, columns } = req.body;
   
@@ -133,6 +103,7 @@ const updateEntriesInTable = async (req, res) => {
 };
 
 const deleteTable = async (req, res) => {
+  console.log(req.body);
     const { tableName } = req.body;
     try {
         const query = `DROP TABLE IF EXISTS ${tableName}`;
