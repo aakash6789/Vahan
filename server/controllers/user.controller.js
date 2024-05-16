@@ -93,7 +93,9 @@ const createTable = asyncHandler(async (req, res) => {
 };
 
 const addEntryToTable = async (req, res) => {
-    const { tableName, entry } = req.body;
+  console.log("Body is",req.body);
+    const tableName = req.body.tableName;
+    const entry = req.body.newRow;
     // console.log(tableName, entry);
     try {
         const columns = Object.keys(entry).join(', ');
