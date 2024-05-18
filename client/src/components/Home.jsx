@@ -32,7 +32,7 @@ useEffect(() => {
     fetchData();
   }, []);
   return (
-    <div>
+    <div className='max-sm:ml-[5%]'>
          {data1 && Array.isArray(data1) && data1
       .filter(table => table.tableName !== "metadata")
       .map((table, index) => (

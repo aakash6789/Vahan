@@ -5,16 +5,43 @@ import './App.css'
 import Navbar from './components/Navbar.jsx'
 import CreateTableForm from './components/CreateTableForm.jsx'
 import TableComponent from './components/TableComponent.jsx'
-import Home from './components/Home.jsx'
+import Home from './components/Home.jsx';
+
+import {
+  RouterProvider,
+  NavLink,
+  Router,
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+} from "react-router-dom";
+import Layout from './components/Layout.jsx'
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/" element={<Layout />}>
+      <Route
+        path=""
+        element={
+          <>
+           <CreateTableForm/>
+          </>
+        }
+      />
+      <Route path="/view-tables" element={<Home/>} />
+     
+    </Route>
+  )
+);
 function App() {
  
 
   return (
     <>
-      <Navbar/>
+      {/* <Navbar/>
       <CreateTableForm/>
-      {/* <TableComponent/> */}
-      <Home/>
+  
+      <Home/> */}
+        <RouterProvider router={router} />
     </>
   )
 }

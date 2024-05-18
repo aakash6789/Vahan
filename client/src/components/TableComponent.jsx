@@ -127,9 +127,9 @@ const TableComponent = ({ data2,setData1,allTableData,updateParentState }) => {
         {/* <button className='bg-green-500 text-white px-2 rounded-md py-1 mx-2 mt-4' onClick={addNewRow}>Add Row</button> */}
         {isEdit === data.tableName && (
           <Popup trigger={isEdit === data.tableName} setTrigger={setIsEdit}>
-            <div className='h-[92vh] max-h-[100vh] w-[60vw] bg-white relative rounded-lg pt-4'>
+            <div className='h-[92vh] max-sm:w-[80vw]  max-sm:ml-[1%] max-h-[100vh] xl:w-[60vw] sm:w-[80vw] lg:[65vw] md:w-[68vw] bg-white relative rounded-lg pt-4'>
               <h2 className='text-xl font-bold ml-[5%]'>{data.tableName}</h2>
-              <table id='tab_b' className='mt-[2%] ml-[5%]'>
+              <table id='tab_b' className='mt-[5%] ml-[5%] max-sm:mt-[10%] max-sm:ml-[2%] max-sm:max-w-[10%] max-sm:text-[0.6rem] '>
                 <thead id='tab_b'>
                   <tr id='tab_b'>
                     {data.columns.map((column, index) => (
@@ -139,7 +139,7 @@ const TableComponent = ({ data2,setData1,allTableData,updateParentState }) => {
                 </thead>
                 <tbody>
                   {data.rows.map((row, rowIndex) => (
-                    <tr id='tab_b' key={rowIndex}>
+                    <tr id='tab_b' className='' key={rowIndex}>
                       {data.columns.map((column, colIndex) => (
                         <td id='tab_b' key={colIndex}>
                           {isEdit === data.tableName ? (
@@ -159,12 +159,11 @@ const TableComponent = ({ data2,setData1,allTableData,updateParentState }) => {
                                  }
                                }));
                                const updatedEntry = {
-                                [data.primaryKey]: row[data.primaryKey], // Use primary key column name
+                                [data.primaryKey]: row[data.primaryKey], 
                                 updatedValues: {
                                     [column.name]: e.target.value
                                 }
                             };
-                            // Update the updateData state
                             setUpdateData(prevUpdateData => ({
                                 ...prevUpdateData,
                                 tableName: data.tableName,
@@ -184,7 +183,7 @@ const TableComponent = ({ data2,setData1,allTableData,updateParentState }) => {
                           )}
                         </td>
                       ))}
-                      <td id='tab_b'>
+                      <td id='' className=''>
                         <button className='bg-red-500 text-white px-2 rounded-md py-1 mx-2' onClick={() => deleteRow(rowIndex)}>
                           Delete
                         </button>
